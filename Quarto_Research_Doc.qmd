@@ -7,6 +7,8 @@ editor: visual
 
 ## Librerías
 
+Importamos las librerías necesarias.
+
 ```{r}
 #| echo: false
 library(readxl)
@@ -14,15 +16,32 @@ library(dplyr)
 library(stringr)
 library(tidytext)
 library(ggplot2)
+library(knitr)
 ```
 
 ## Carga de datos
 
-Llamamos las librerías necesarias
+Se leen los archivos de Excel. En el paso anterior de transformación, se dividió el archivo .json extraído de Reddit en dos entidades: comentarios y publicaciones, para mantener una estructura relacional y que los comentarios no pierdan los metadatos de las publicaciones asociadas.
 
 ```{r}
 comments <- read_excel("output_files/comments.xlsx")
 posts <- read_excel("output_files/posts.xlsx")
+```
+
+Se obtiene un vistazo preliminar de los primeros registros de los conjuntos de datos para verificar que la lectura del archivo fue exitosa y entender la estructura de las variables antes de iniciar el análisis como tal.
+
+Estructura de comentarios.
+
+```{r}
+head(comments, 5) %>% 
+  kable()
+```
+
+Estructura de publicaciones
+
+```{r}
+head(posts, 5) %>% 
+  kable()
 ```
 
 ## Preprocesamiento de datos
@@ -38,3 +57,7 @@ comments_clean <- comments %>%
 ```
 
 The `echo: false` option disables the printing of code (only output is displayed).
+
+```{r}
+comments_clean
+```
