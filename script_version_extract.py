@@ -56,9 +56,9 @@ subreddit = reddit.subreddit('devsarg')
 query = "gpt OR ia OR chatgpt OR ia generativa OR vibe coding OR cursor OR llms OR va a dejarnos sin trabajo OR copilot OR github copilot OR chatgpt4 OR chatgpt-4 OR chat gpt 4 OR chat gpt4 OR chat gpt-4 OR chatgpt-4.0 OR chatgpt 4.0 OR chatgpt-4.0"
 
 
+
 with open('devsarg_1.json', 'w') as fout:
-    for submission in subreddit.search(query, sort="new", limit=1000):
-        print("entered")
+    for submission in subreddit.search(query, sort="new", limit=20):
         thread = get_metadata(submission)
         json.dump(thread, fout)
         fout.write('\n')
