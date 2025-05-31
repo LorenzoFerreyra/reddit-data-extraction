@@ -1,0 +1,34 @@
+---
+title: "Trabajo de Taller de Investigación: Text mining"
+author: "Lorenzo Ferreyra"
+format: html
+editor: visual
+---
+
+## Librerías
+
+```{r}
+library(readxl)
+library(dplyr)
+library(stringr)
+library(tidytext)
+library(ggplot2)
+```
+
+## Carga de datos
+
+Llamamos las librerías necesarias
+
+```{r}
+comments <- read_excel("output_files/comments.xlsx")
+posts <- read_excel("output_files/posts.xlsx")
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
