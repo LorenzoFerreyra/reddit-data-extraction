@@ -110,14 +110,14 @@ mis_stopwords <- tibble(palabra = c("si", "mas", "va", "hace","ahora", "trabajo"
 "mismo", "van", "ver", "mejor", "creo", "sino", "sos", "q","así"))
 stopwords_es <- tibble(palabra = stopwords("es")) %>%
   bind_rows(mis_stopwords)
-comentarios_filtrados <- comentarios_tokenizados %>%
+tokens_combinados <- tokens_combinados %>%
   anti_join(stopwords_es, by = "palabra")
 ```
 
 ## Análisis de frecuencia de palabras
 
 ```{r}
-frecuencias <- comentarios_filtrados %>%
+frecuencias <- tokens_combinados %>%
   count(palabra, sort = TRUE)
 
 head(frecuencias, 20) %>%
