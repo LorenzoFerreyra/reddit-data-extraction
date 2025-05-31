@@ -8,6 +8,7 @@ editor: visual
 ## Librerías
 
 ```{r}
+#| echo: false
 library(readxl)
 library(dplyr)
 library(stringr)
@@ -24,11 +25,16 @@ comments <- read_excel("output_files/comments.xlsx")
 posts <- read_excel("output_files/posts.xlsx")
 ```
 
-You can add options to executable code like this
+## Preprocesamiento de datos
+
+Se limpia el texto de los comentarios; se pasa todo a minúsculas, se eliminan links, símbolos irrelevantes, etc.
 
 ```{r}
-#| echo: false
-2 * 2
+comments_clean <- comments %>%
+  mutate(body = str_to_lower(body)) %>%
+  mutate(body = str_remove_all(body, "http\\S+|www\\S+")) %>%
+  mutate(body = str_remove_all(body, "[^a-záéíóúüñ\\s]")) %>%
+  mutate(body = str_squish(body))
 ```
 
 The `echo: false` option disables the printing of code (only output is displayed).
