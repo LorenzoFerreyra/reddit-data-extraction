@@ -60,22 +60,38 @@ comments_clean <- comments %>%
   mutate(body = str_squish(body))
 ```
 
-Observación del dataframe luego del procesamiento de datos.
+Como los títulos y el cuerpo de las publicaciones también tienen información muy relevantes, se hará una combinación de ambos dataframes, con el mismo procesamiento.
 
 ```{r}
-head(comments_clean, 5) %>% 
-  kable()
+posts_clean <- posts %>%
+  mutate(body = str_to_lower(body)) %>%
+  mutate(body = str_remove_all(body, "http\\S+|www\\S+")) %>%
+  mutate(body = str_remove_all(body, "[^a-záéíóúüñ\\s]")) %>%
+  mutate(body = str_squish(body))
+
 ```
 
 ## Tokenización
 
+Se tokenizan y combinan ambos dataframes con rbind.
+
 ```{r}
+posts_tokenizados <- posts_clean %>%
+  unnest_tokens(palabra, body) %>%
+  mutate(origen = "post")
 
 comentarios_tokenizados <- comments_clean %>%
-  unnest_tokens(palabra, body)
-head(comentarios_tokenizados, 5) %>% 
-  kable()
+  unnest_tokens(palabra, body) %>%
+  mutate(origen = "comentario")
 
+tokens_combinados <- bind_rows(posts_tokenizados, comentarios_tokenizados)
+```
+
+Observación del dataframe luego del procesamiento de datos.
+
+```{r}
+head(tokens_combinados, 5) %>% 
+  kable()
 ```
 
 ## Eliminación de stopwords
