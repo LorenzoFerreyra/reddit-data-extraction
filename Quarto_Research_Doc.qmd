@@ -1,7 +1,9 @@
 ---
 title: "Trabajo de Taller de Investigación: Text mining"
 author: "Lorenzo Ferreyra"
-format: html
+format: 
+  html:
+    self-contained: true
 editor: visual
 ---
 
@@ -18,6 +20,7 @@ library(ggplot2)
 library(knitr)
 library(tidytext)
 library(stopwords)
+library(wordcloud2)
 ```
 
 ## Carga de datos
@@ -106,6 +109,11 @@ head(frecuencias, 20) %>%
   geom_col(fill = "steelblue") +
   coord_flip() +
   labs(title = "Palabras más frecuentes en los comentarios", x = "", y = "Frecuencia")
+
+```
+
+```{r}
+wordcloud2(data = frecuencias, size = 1.5, color = 'random-light', backgroundColor = "black")
 
 ```
 
