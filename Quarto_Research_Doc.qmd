@@ -14,9 +14,10 @@ Importamos las librerías necesarias.
 library(readxl)
 library(dplyr)
 library(stringr)
-library(tidytext)
 library(ggplot2)
 library(knitr)
+library(tidytext)
+library(stopwords)
 ```
 
 ## Carga de datos
@@ -30,14 +31,14 @@ posts <- read_excel("output_files/posts.xlsx")
 
 Se obtiene un vistazo preliminar de los primeros registros de los conjuntos de datos para verificar que la lectura del archivo fue exitosa y entender la estructura de las variables antes de iniciar el análisis como tal.
 
-Estructura de comentarios.
+### Estructura de comentarios
 
 ```{r}
 head(comments, 5) %>% 
   kable()
 ```
 
-Estructura de publicaciones
+### Estructura de publicaciones
 
 ```{r}
 head(posts, 5) %>% 
@@ -56,8 +57,70 @@ comments_clean <- comments %>%
   mutate(body = str_squish(body))
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+Observación del dataframe luego del procesamiento de datos.
 
 ```{r}
-comments_clean
+head(comments_clean, 5) %>% 
+  kable()
+```
+
+## Tokenización
+
+```{r}
+
+comentarios_tokenizados <- comments_clean %>%
+  unnest_tokens(palabra, body)
+head(comentarios_tokenizados, 5) %>% 
+  kable()
+
+```
+
+## Eliminación de stopwords
+
+```{r}
+
+
+stopwords_es <- tibble(palabra = stopwords("es"))
+
+comentarios_filtrados <- comentarios_tokenizados %>%
+  anti_join(stopwords_es, by = "palabra")
+
+```
+
+## Personalización de las stopwords
+
+Dado que las stopwords que nos ofrece la librería stopwords para la lengua española no es exhaustiva, se la personaliza para agregar unidades relevantes para este caso.
+
+```{r}
+
+```
+
+## Análisis de frecuencia de palabras
+
+```{r}
+frecuencias <- comentarios_filtrados %>%
+  count(palabra, sort = TRUE)
+
+head(frecuencias, 20) %>%
+  ggplot(aes(x = reorder(palabra, n), y = n)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(title = "Palabras más frecuentes en los comentarios", x = "", y = "Frecuencia")
+
+```
+
+## Análisis de sentimientos
+
+```{r}
+sentimientos <- get_sentiments("nrc", language = "spanish")
+
+sentimiento_comentarios <- comentarios_filtrados %>%
+  inner_join(sentimientos, by = c("palabra" = "word")) %>%
+  count(sentiment, sort = TRUE)
+
+ggplot(sentimiento_comentarios, aes(x = reorder(sentiment, n), y = n, fill = sentiment)) +
+  geom_col() +
+  coord_flip() +
+  labs(title = "Distribución de sentimientos en los comentarios")
+
 ```
