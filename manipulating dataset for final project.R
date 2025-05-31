@@ -4,9 +4,17 @@ library(writexl)
 
 data <- stream_in(file("devsarg.json"))
 
-data <- as.data.frame(data)
+#data <- as.data.frame(data)
 
-data <- as_tibble(data)
-# to_excel 
+df <- as_tibble(data)
+df <- tibble(
+  post_id = data$id,
+  title = data$title,
+  score = data$score,
+  url = data$url,
+  created = data$created,
+  body = data$body,
+  comments = data$posts
+)
 
-write_xlsx(data, "###devsarg.xlsx")
+write_xlsx(data, "devsarg.xlsx")
