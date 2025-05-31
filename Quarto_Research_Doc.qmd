@@ -79,12 +79,7 @@ head(comentarios_tokenizados, 5) %>%
 
 ```{r}
 
-
 stopwords_es <- tibble(palabra = stopwords("es"))
-
-comentarios_filtrados <- comentarios_tokenizados %>%
-  anti_join(stopwords_es, by = "palabra")
-
 ```
 
 ## Personalización de las stopwords
@@ -92,7 +87,12 @@ comentarios_filtrados <- comentarios_tokenizados %>%
 Dado que las stopwords que nos ofrece la librería stopwords para la lengua española no es exhaustiva, se la personaliza para agregar unidades relevantes para este caso.
 
 ```{r}
-
+mis_stopwords <- tibble(palabra = c("si", "mas", "va", "hace","ahora", "trabajo", "puede", "tener", "menos", "solo", "vos",
+"mismo", "van", "ver", "mejor", "creo", "sino", "sos", "q","así"))
+stopwords_es <- tibble(palabra = stopwords("es")) %>%
+  bind_rows(mis_stopwords)
+comentarios_filtrados <- comentarios_tokenizados %>%
+  anti_join(stopwords_es, by = "palabra")
 ```
 
 ## Análisis de frecuencia de palabras
@@ -108,6 +108,8 @@ head(frecuencias, 20) %>%
   labs(title = "Palabras más frecuentes en los comentarios", x = "", y = "Frecuencia")
 
 ```
+
+Palabras como ia, código, gente, programadores y laburo, además de años, demuestran que en el conjunto de datos se encuentran discusiones relevantes no solo sobre la inteligencia artificial generativa como tal, sino sobre el futuro del trabajo y la productividad.
 
 ## Análisis de sentimientos
 
