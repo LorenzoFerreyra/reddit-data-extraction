@@ -1,1 +1,9 @@
 reddit_credentials.json
+.Rhistory
+.RData
+.Rproj.user/
+.Ruserdata
+*.Rproj
+.DS_Store
+*.html
+_quarto/
