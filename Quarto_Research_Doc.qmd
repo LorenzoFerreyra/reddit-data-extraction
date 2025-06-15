@@ -128,7 +128,7 @@ tokens_combinados <- tokens_combinados %>%
   anti_join(stopwords_es, by = "palabra")
 ```
 
-## Análisis de frecuencia de palabras
+### Análisis de frecuencia de palabras
 
 ```{r}
 frecuencias <- tokens_combinados %>%
