@@ -71,6 +71,20 @@ posts_clean <- posts %>%
 
 ```
 
+El resultado del preprocesamiento son los siguientes dataframes. Publicaciones:
+
+```{r}
+head(posts_clean, 100) %>% 
+  kable()
+```
+
+Comentarios:
+
+```{r}
+head(comments_clean, 5) %>% 
+  kable()
+```
+
 ## Tokenización
 
 Se tokenizan y combinan ambos dataframes con rbind.

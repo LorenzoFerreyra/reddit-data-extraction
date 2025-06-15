@@ -16,11 +16,9 @@ Analizar las opiniones y preocupaciones expresadas por desarrolladores y persona
 - ¿Qué actitudes predominan: entusiasmo, escepticismo, temor, indiferencia?
 
 ## Hipótesis
-- **H1:** La mayoría de los comentarios de desarrolladores sobre la inteligencia artificial generativa se enfocan en sus usos prácticos más que en sus consecuencias laborales.  
-- **H2:** Las preocupaciones éticas y sobre la veracidad de los contenidos generados por IAs tienen mayor peso que el temor a perder el empleo.  
-- **H3:** Los profesionales con experiencia técnica avanzada tienden a mostrar actitudes más positivas y exploratorias frente a los LLM que los perfiles junior o no técnicos.  
-- **H4:** La percepción negativa sobre la IA se asocia más frecuentemente a problemas de calidad de las respuestas, sesgos o limitaciones técnicas que al miedo al desempleo.  
-- **H5:** Existe un segmento de la comunidad IT que ve a la IA generativa como una herramienta de aumento de productividad, no como un reemplazo.
+- **H1:**  Predominio de enfoque funcional y pragmático:  la mayoría de los comentarios sobre IA generativa expresan una actitud pragmática y centrada en su utilidad práctica y productividad
+- **H2:** Críticas centradas en problemas técnicos: las críticas a la IA generativa en comentarios negativos se centran más en sus limitaciones técnicas que en preocupaciones éticas o laborale  
+- **H3:** Presencia significativa de preocupaciones sobre el impacto laboral: existe un segmento relevante de la comunidad IT que expresa preocupación por el posible impacto negativo de la IA generativa en el futuro del trabajo y la estabilidad laboral.
 
 ## Metodología a utilizar (tentativo)
 Enfoque exploratorio y descriptivo, con análisis de texto basado en técnicas de minería de texto y procesamiento de lenguaje natural (NLP). Se utilizarán herramientas en Python para la extracción de datos y R para el análisis, con visualizaciones y redacción final en Quarto.
