@@ -1,5 +1,5 @@
 ---
-title: "Trabajo de Taller de Investigación: Text mining"
+title: "Trabajo de Taller de investigación: text mining"
 author: "Lorenzo Ferreyra"
 format: 
   html:
