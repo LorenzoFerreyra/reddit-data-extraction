@@ -20,6 +20,17 @@ Analizar las opiniones y preocupaciones expresadas por desarrolladores y persona
 - **H2:** Críticas centradas en problemas técnicos: las críticas a la IA generativa en comentarios negativos se centran más en sus limitaciones técnicas que en preocupaciones éticas o laborale  
 - **H3:** Presencia significativa de preocupaciones sobre el impacto laboral: existe un segmento relevante de la comunidad IT que expresa preocupación por el posible impacto negativo de la IA generativa en el futuro del trabajo y la estabilidad laboral.
 
+| Variable                 | Tipo                                                                       | Cómo se obtiene                                        |
+| ------------------------ | -------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `sentimiento`            | categórica (positivo / negativo / neutral)                                 | análisis de sentimiento                                |
+| `emoción`                | categórica (aceptación, escepticismo, temor, etc.)                         | análisis NLP                                           |
+| `tema_principal`         | categórica (uso práctico, crítica técnica, crítica ética, impacto laboral) | clasificación por palabras clave o clustering          |
+| `menciona_productividad` | binaria                                                                    | regex/keywords: *automatizar, ayuda, mejora*           |
+| `menciona_empleo`        | binaria                                                                    | *desempleo, reemplazo, trabajo, fin del desarrollador* |
+| `menciona_errores`       | binaria                                                                    | *alucina, error, se equivoca, confunde*                |
+| `menciona_ética`         | binaria                                                                    | *sesgo, ética, desinformación*                         |
+
+
 ## Metodología a utilizar (tentativo)
 Enfoque exploratorio y descriptivo, con análisis de texto basado en técnicas de minería de texto y procesamiento de lenguaje natural (NLP). Se utilizarán herramientas en Python para la extracción de datos y R para el análisis, con visualizaciones y redacción final en Quarto.
 
