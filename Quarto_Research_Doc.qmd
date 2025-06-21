@@ -267,17 +267,22 @@ dtm <- tokens_combinados %>%
   count(doc_id, lemma) %>%
   cast_dtm(document = doc_id, term = lemma, value = n)
 
-# LDA con 4 tópicos
 lda_model <- LDA(dtm, k = 4, control = list(seed = 1234))
 
-# Palabras más representativas por tópico
+```
+
+Se extraen las palabras más representativas por tema. Se calcula la probabilidad de cada palabra en cada tópico. Luego, se agrupa por tópico y se eligen las 10 palabras más representativas (con mayor beta), ya que las palabras con mayor beta para cada tópico son las que mejor definen ese tema.
+
+```{r}
 topics <- tidy(lda_model, matrix = "beta") %>%
   group_by(topic) %>%
   top_n(10, beta) %>%
   arrange(topic, -beta)
+```
 
-# Visualización
-library(ggplot2)
+Aquí se agrupan las palabras por tópico (una faceta por cada tema) y se muestra qué tan importante (alta beta) es cada término para ese tópico.
+
+```{r}
 ggplot(topics, aes(x = reorder_within(term, beta, topic), y = beta, fill = factor(topic))) +
   geom_col(show.legend = FALSE) +
   facet_wrap(~ topic, scales = "free") +
