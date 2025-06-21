@@ -196,3 +196,64 @@ ggplot(polaridad, aes(x = sentimiento, y = frecuencia, fill = sentimiento)) +
   labs(title = "Polaridad de los sentimientos", x = "Polaridad", y = "Frecuencia")
 
 ```
+
+## Interpretación de resultados y discusión
+
+### ¿Qué temas o preocupaciones se mencionan con mayor frecuencia?
+
+```{r}
+tokens_combinados <- tokens_combinados %>%
+  mutate(
+    menciona_productividad = if_else(str_detect(lemma, 
+      "automatizar|automatización|ayuda|mejora|productividad|eficiencia|rápido|velocidad|optimizar|optimización|rendimiento|agilizar|facilitar|acelerar|aumentar"), 1, 0),
+    
+    menciona_empleo = if_else(str_detect(lemma, 
+      "desempleo|reemplazo|trabajo|empleo|ocupación|puesto|laboral|desarrollador|profesión|oficio|recursos|sustituir|desplazar|perder"), 1, 0),
+    
+    menciona_errores = if_else(str_detect(lemma, 
+      "alucinar|alucinación|error|equivocar|confundir|malo|incorrecto|fallo|problema|falla|defecto|limitación|inexacto|bug"), 1, 0),
+    
+    menciona_etica = if_else(str_detect(lemma, 
+      "sesgo|ética|desinformación|manipular|engaño|falsedad|engañoso|responsabilidad|transparencia|discriminación|prejuicio|moral|control|censura|justicia|privacidad"), 1, 0)
+  )
+menciones_totales <- tokens_combinados %>%
+  summarise(
+    productividad = sum(menciona_productividad),
+    empleo = sum(menciona_empleo),
+    errores = sum(menciona_errores),
+    etica = sum(menciona_etica)
+  ) %>%
+  pivot_longer(cols = everything(), names_to = "categoria", values_to = "frecuencia")
+
+# Gráfico de barras
+ggplot(menciones_totales, aes(x = reorder(categoria, frecuencia), y = frecuencia, fill = categoria)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  labs(
+    title = "Frecuencia de menciones por tema clave",
+    x = "Categoría",
+    y = "Frecuencia"
+  ) +
+  scale_fill_brewer(palette = "Set2")
+
+```
+
+### ¿Qué actitudes predominan: entusiasmo, escepticismo, temor, indiferencia?
+
+```{r}
+{r}
+actitudes <- sentimientos_totales %>%
+mutate(
+actitud = case_when(
+sentimiento %in% c("joy", "trust", "positive", "anticipation") ~ "entusiasmo",
+sentimiento %in% c("fear", "anger", "sadness", "disgust", "negative") ~ "temor / escepticismo",
+TRUE ~ "otro"
+)
+) %>%
+group_by(actitud) %>%
+summarise(frecuencia = sum(frecuencia))
+
+ggplot(actitudes, aes(x = actitud, y = frecuencia, fill = actitud)) +
+geom_col(show.legend = FALSE) +
+labs(title = "Actitudes predominantes en los comentarios", x = "", y = "Frecuencia")
+```
