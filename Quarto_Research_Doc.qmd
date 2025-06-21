@@ -88,26 +88,28 @@ head(comments_clean, 5) %>%
   kable()
 ```
 
-## Tokenización
+## Lematización y tokenización
 
-Se tokenizan y combinan ambos dataframes con rbind.
+Se lematizan, tokenizan y combinan ambos dataframes con rbind.
 
 ```{r}
-posts_tokenizados <- posts_clean %>%
-  unnest_tokens(palabra, body) %>%
-  mutate(origen = "post")
+modelo <- udpipe_load_model(modelo_ud$file_model)
+anotados_comentarios <- udpipe_annotate(modelo, x = comments_clean$body)
+anotados_comentarios <- as.data.frame(anotados_comentarios)
+anotados_comentarios$origen <- "comentario"
+anotados_posts <- udpipe_annotate(modelo, x = posts_clean$body)
+anotados_posts <- as.data.frame(anotados_posts)
+anotados_posts$origen <- "post"
+tokens_combinados <- bind_rows(anotados_comentarios, anotados_posts)
 
-comentarios_tokenizados <- comments_clean %>%
-  unnest_tokens(palabra, body) %>%
-  mutate(origen = "comentario")
 
-tokens_combinados <- bind_rows(posts_tokenizados, comentarios_tokenizados)
 ```
 
-Observación del dataframe luego del procesamiento de datos.
+Observación del dataframe luego del procesamiento de datos y la lematización (que incluye el tokenizado).
 
 ```{r}
-head(tokens_combinados, 5) %>% 
+
+head(tokens_combinados %>% select(token, lemma, upos, origen), 10) %>% 
   kable()
 ```
 
@@ -123,22 +125,23 @@ stopwords_es <- tibble(palabra = stopwords("es"))
 Dado que las stopwords que nos ofrece la librería stopwords para la lengua española no es exhaustiva, se la personaliza para agregar unidades relevantes para este caso.
 
 ```{r}
-mis_stopwords <- tibble(palabra = c("si", "mas", "va", "hace","ahora", "trabajo", "puede", "tener", "menos", "solo", "vos",
-"mismo", "van", "ver", "mejor", "creo", "sino", "sos", "q","así"))
-stopwords_es <- tibble(palabra = stopwords("es")) %>%
+mis_stopwords <- tibble(lemma = c("si", "mas", "ahora", "menos", "solo", "vos",
+"mismo", "mejor", "sino", "q","así", "ser", "hacer",  "tener", "haber", "poder", "ir", "decir", "usar", "saber", "dar", "pasar", "querer", "ver", "creer"))
+stopwords_es <- tibble(lemma = stopwords("es")) %>%
   bind_rows(mis_stopwords)
 tokens_combinados <- tokens_combinados %>%
-  anti_join(stopwords_es, by = "palabra")
+  filter(!is.na(lemma)) %>%
+  anti_join(stopwords_es, by = "lemma")
 ```
 
 ### Análisis de frecuencia de palabras
 
 ```{r}
 frecuencias <- tokens_combinados %>%
-  count(palabra, sort = TRUE)
+  count(lemma, sort = TRUE)
 
 head(frecuencias, 20) %>%
-  ggplot(aes(x = reorder(palabra, n), y = n)) +
+  ggplot(aes(x = reorder(lemma, n), y = n)) +
   geom_col(fill = "steelblue") +
   coord_flip() +
   labs(title = "Palabras más frecuentes en los comentarios", x = "", y = "Frecuencia")
@@ -155,12 +158,12 @@ Palabras como ia, código, gente, programadores y laburo, además de años, demu
 ## Análisis de sentimientos
 
 ```{r}
-sentimientos <- get_nrc_sentiment(comentarios_filtrados$palabra, language = "spanish")
+sentimientos <- get_nrc_sentiment(tokens_combinados$lemma, language = "spanish")
 
 ```
 
 ```{r}
-sentimientos$palabra <- comentarios_filtrados$palabra
+sentimientos$palabra <- tokens_combinados$lemma
 
 ```
 
