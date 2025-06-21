@@ -21,6 +21,9 @@ library(knitr)
 library(tidytext)
 library(stopwords)
 library(wordcloud2)
+library(syuzhet)
+library(tidyr)
+library(udpipe)
 ```
 
 ## Carga de datos
@@ -152,15 +155,41 @@ Palabras como ia, código, gente, programadores y laburo, además de años, demu
 ## Análisis de sentimientos
 
 ```{r}
-sentimientos <- get_sentiments("nrc", language = "spanish")
+sentimientos <- get_nrc_sentiment(comentarios_filtrados$palabra, language = "spanish")
 
-sentimiento_comentarios <- comentarios_filtrados %>%
-  inner_join(sentimientos, by = c("palabra" = "word")) %>%
-  count(sentiment, sort = TRUE)
+```
 
-ggplot(sentimiento_comentarios, aes(x = reorder(sentiment, n), y = n, fill = sentiment)) +
-  geom_col() +
+```{r}
+sentimientos$palabra <- comentarios_filtrados$palabra
+
+```
+
+```{r}
+sentimientos_totales <- sentimientos %>%
+  select(-palabra) %>%  # Quitamos la columna palabra para el resumen
+  summarise(across(everything(), sum)) %>%  # Sumamos por columna
+  pivot_longer(cols = everything(), names_to = "sentimiento", values_to = "frecuencia") %>%
+  arrange(desc(frecuencia))
+ggplot(sentimientos_totales, aes(x = reorder(sentimiento, frecuencia), y = frecuencia, fill = sentimiento)) +
+  geom_col(show.legend = FALSE) +
   coord_flip() +
-  labs(title = "Distribución de sentimientos en los comentarios")
+  labs(
+    title = "Distribución de sentimientos en los comentarios",
+    x = "Sentimiento",
+    y = "Frecuencia"
+  )
+```
+
+A partir del análisis de los comentarios y publicaciones combinados, se observa una predominancia de sentimientos positivos, seguidos por negativos, y en menor medida, emociones como *trust*, *anticipation*, *sadness* y *fear*. Esta distribución posibilta la hipótesis de una actitud pragmática y funcional por parte de los profesionales IT frente a la inteligencia artificial generativa, con una valoración positiva de su potencial productivo, aunque sin dejar de lado preocupaciones técnicas o éticas.
+
+Asimismo, el hecho de que las emociones negativas no sean dominantes, pero sí estén presentes en forma significativa (*fear*, *sadness*, *anger*), permite identificar tensiones latentes respecto al impacto de estas tecnologías, especialmente cuando se piensa en la calidad de los resultados y el futuro del trabajo.
+
+```{r}
+polaridad <- sentimientos_totales %>%
+  filter(sentimiento %in% c("positive", "negative"))
+
+ggplot(polaridad, aes(x = sentimiento, y = frecuencia, fill = sentimiento)) +
+  geom_col(show.legend = FALSE) +
+  labs(title = "Polaridad de los sentimientos", x = "Polaridad", y = "Frecuencia")
 
 ```
