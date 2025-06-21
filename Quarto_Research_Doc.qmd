@@ -24,6 +24,9 @@ library(wordcloud2)
 library(syuzhet)
 library(tidyr)
 library(udpipe)
+library(tm)
+library(reshape2)
+library(topicmodels) 
 ```
 
 ## Carga de datos
@@ -93,7 +96,8 @@ head(comments_clean, 5) %>%
 Se lematizan, tokenizan y combinan ambos dataframes con rbind.
 
 ```{r}
-modelo <- udpipe_load_model(modelo_ud$file_model)
+modelo_ud <- udpipe_download_model(language = "spanish", model_dir = "models")
+modelo <- udpipe_load_model("models/spanish-gsd-ud-2.5-191206.udpipe")
 anotados_comentarios <- udpipe_annotate(modelo, x = comments_clean$body)
 anotados_comentarios <- as.data.frame(anotados_comentarios)
 anotados_comentarios$origen <- "comentario"
@@ -225,7 +229,6 @@ menciones_totales <- tokens_combinados %>%
   ) %>%
   pivot_longer(cols = everything(), names_to = "categoria", values_to = "frecuencia")
 
-# Gráfico de barras
 ggplot(menciones_totales, aes(x = reorder(categoria, frecuencia), y = frecuencia, fill = categoria)) +
   geom_col(show.legend = FALSE) +
   coord_flip() +
@@ -256,4 +259,29 @@ summarise(frecuencia = sum(frecuencia))
 ggplot(actitudes, aes(x = actitud, y = frecuencia, fill = actitud)) +
 geom_col(show.legend = FALSE) +
 labs(title = "Actitudes predominantes en los comentarios", x = "", y = "Frecuencia")
+```
+
+```{r}
+
+dtm <- tokens_combinados %>%
+  count(doc_id, lemma) %>%
+  cast_dtm(document = doc_id, term = lemma, value = n)
+
+# LDA con 4 tópicos
+lda_model <- LDA(dtm, k = 4, control = list(seed = 1234))
+
+# Palabras más representativas por tópico
+topics <- tidy(lda_model, matrix = "beta") %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  arrange(topic, -beta)
+
+# Visualización
+library(ggplot2)
+ggplot(topics, aes(x = reorder_within(term, beta, topic), y = beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() +
+  scale_x_reordered() +
+  labs(title = "Tópicos identificados por LDA", x = "Términos", y = "Importancia")
 ```
