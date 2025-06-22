@@ -31,7 +31,7 @@ Analizar las opiniones y preocupaciones expresadas por desarrolladores y persona
 | `menciona_ética`         | binaria                                                                    | *sesgo, ética, desinformación*                         |
 
 
-## Metodología a utilizar (tentativo)
+## Metodología a utilizar
 Enfoque exploratorio y descriptivo, con análisis de texto basado en técnicas de minería de texto y procesamiento de lenguaje natural (NLP). Se utilizarán herramientas en Python para la extracción de datos y R para el análisis, con visualizaciones y redacción final en Quarto.
 
 ## Descripción del corpus o conjunto de datos
