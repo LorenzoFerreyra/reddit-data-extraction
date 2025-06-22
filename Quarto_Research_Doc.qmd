@@ -11,12 +11,70 @@ toc-title: "Contenido"
 number-sections: true
 ---
 
+## Introducción
+
+## Opiniones de la comunidad IT sobre la inteligencia artificial generativa: un análisis de comentarios en Reddit
+
+### Objetivo general
+
+Analizar las opiniones y preocupaciones expresadas por desarrolladores y personal IT respecto a la inteligencia artificial generativa y los grandes modelos de lenguaje (LLM), a través de sus comentarios en Reddit.
+
+### Objetivos específicos
+
+-   Identificar temas recurrentes en las discusiones sobre IA generativa dentro de comunidades técnicas.
+-   Explorar las emociones y actitudes predominantes respecto a herramientas como ChatGPT, GitHub Copilot, etc.
+-   Detectar patrones de aceptación, resistencia o preocupación vinculados al impacto laboral, ético o productivo de estas tecnologías.
+
+### Pregunta de investigación
+
+¿Qué piensan los desarrolladores y profesionales IT sobre la inteligencia artificial generativa y sus aplicaciones?
+
+#### Subpreguntas
+
+-   ¿Qué temas o preocupaciones se mencionan con mayor frecuencia?
+-   ¿Qué actitudes predominan: entusiasmo, escepticismo, temor, indiferencia?
+
+### Hipótesis
+
+1.  Predominio de enfoque funcional y pragmático: la mayoría de los comentarios sobre IA generativa expresan una actitud pragmática y centrada en su utilidad práctica y productividad.
+2.  Críticas centradas en problemas técnicos: las críticas a la IA generativa en comentarios negativos se centran más en sus limitaciones técnicas que en preocupaciones éticas o laborales.
+3.  Presencia significativa de preocupaciones sobre el impacto laboral: existe un segmento relevante de la comunidad IT que expresa preocupación por el posible impacto negativo de la IA generativa en el futuro del trabajo y la estabilidad laboral.
+
+### Variables principales
+
+| Variable | Tipo | Cómo se obtiene |
+|------------------|--------------------|----------------------------------|
+| sentimiento | categórica (positivo/negativo/neutral) | análisis de sentimiento |
+| emoción | categórica (aceptación, escepticismo, temor, etc.) | análisis NLP |
+| tema_principal | categórica (uso práctico, crítica técnica, crítica ética, impacto laboral) | clasificación por palabras clave o clustering |
+| menciona_productividad | binaria | regex/keywords: automatizar, ayuda, mejora |
+| menciona_empleo | binaria | desempleo, reemplazo, trabajo, fin del desarrollador |
+| menciona_errores | binaria | alucina, error, se equivoca, confunde |
+| menciona_ética | binaria | sesgo, ética, desinformación |
+
+### Metodología
+
+Se adopta un enfoque exploratorio y descriptivo, basado en minería de texto y procesamiento de lenguaje natural (NLP). La extracción de datos se realiza con Python (utilizando la librería `praw` para acceder a la API de Reddit), mientras que el análisis y visualización se llevan a cabo en R, con redacción final en Quarto.
+
+### Descripción del corpus
+
+Los datos provienen de comentarios extraídos del subreddit [`r/devsarg`](https://www.reddit.com/r/devsarg/), un espacio activo de discusión entre profesionales IT en Reddit, que refleja percepciones actuales sobre inteligencia artificial generativa y tecnologías asociadas.
+
+### Antecedentes
+
+Este análisis se inspira en estudios como la Stack Overflow Developer Survey 2023 (si bien ese instrumento recolecta información de primera mano, a diferencia de esta), que recoge información de primera mano mediante encuestas directas a desarrolladores a nivel global. En contraste, este trabajo se basa en una fuente secundaria, y se analizan datos extraídos de interacciones en línea en un entorno virtual más localizado, predominante en usuarios de Argentina y el Cono Sur.
+
+Fuente: [Stack Overflow Developer Survey 2023 – Sentiment and usage: AI](https://survey.stackoverflow.co/2023/#sentiment-and-usage-ai-select)
+
+## Análisis
+
+Tras completar las fases iniciales de extracción de datos desde Reddit, a las que se puede acceder en [Extracción de datos con PRAW](https://github.com/LorenzoFerreyra/reddit-data-extraction/blob/main/Extraccion%20de%20datos%20de%20Reddit%20con%20praw%20para%20text%20mining.ipynb) y la posterior manipulación y transformación de los datos en [Manipulación de datos](https://github.com/LorenzoFerreyra/reddit-data-extraction/blob/main/Manipulaci%C3%B3n%20de%20datos.ipynb), se da inicio a la fase de análisis, donde se aplican técnicas de minería de texto para explorar las opiniones de la comunidad IT sobre la inteligencia artificial generativa.
+
 ## Librerías
 
 Importamos las librerías. Este análisis se apoyó en varias librerías del universo R para procesamiento, análisis y visualización de texto. Se utilizaron: readxl, dplyr, stringr, ggplot2, knitr, tidytext, stopwords, wordcloud2, syuzhet, tidyr, udpipe, tm, reshape2 y topicmodels.
 
 ```{r}
-#| echo: false
 suppressWarnings(suppressPackageStartupMessages({
   library(readxl)
   library(dplyr)
@@ -56,7 +114,7 @@ head(comments, 5) %>%
 ### Estructura de publicaciones
 
 ```{r}
-head(posts, 5) %>% 
+head(posts, 3) %>% 
   kable()
 ```
 
