@@ -13,7 +13,7 @@ number-sections: true
 
 ## Librerías
 
-Importamos las librerías necesarias.
+Importamos las librerías. Este análisis se apoyó en varias librerías del universo R para procesamiento, análisis y visualización de texto. Se utilizaron: readxl, dplyr, stringr, ggplot2, knitr, tidytext, stopwords, wordcloud2, syuzhet, tidyr, udpipe, tm, reshape2 y topicmodels.
 
 ```{r}
 #| echo: false
@@ -165,7 +165,7 @@ wordcloud2(data = frecuencias, size = 1.5, color = 'random-light', backgroundCol
 
 Palabras como ia, código, gente, programadores y trabajo, además de años, demuestran que en el conjunto de datos se encuentran discusiones relevantes no solo sobre la inteligencia artificial generativa como tal, sino sobre el futuro del trabajo y la productividad.
 
-### Modelado de tópicos con LDA
+## Modelado de tópicos con LDA
 
 ```{r}
 dtm <- tokens_combinados %>%  
