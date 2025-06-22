@@ -374,7 +374,7 @@ Sin embargo, también emergieron con fuerza menciones críticas asociadas al esc
 
 ## Referencias
 
--   Arii, B. *Text Mining Resources*. Disponible en: <https://ariibard.github.io/>
+-   Ariana Bardauil. *Text Mining Resources*. Disponible en: <https://ariibard.github.io/>
 
 -   Number Analytics. *Advanced Text Mining with tidytext in R*. Disponible en: <https://www.numberanalytics.com/blog/advanced-text-mining-tidytext-r>
 
