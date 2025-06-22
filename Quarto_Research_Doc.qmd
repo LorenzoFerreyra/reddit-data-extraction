@@ -1,6 +1,6 @@
 ---
 title: "Trabajo de Taller de investigación: text mining"
-author: "Lorenzo Ferreyra (Universidad de Flores)"
+author: "[Lorenzo Ferreyra (Universidad de Flores)](https://github.com/lorenzoferreyra)"
 format: 
   html:
     self-contained: true
@@ -43,7 +43,7 @@ Analizar las opiniones y preocupaciones expresadas por desarrolladores y persona
 ### Variables principales
 
 | Variable | Tipo | Cómo se obtiene |
-|----|----|----|
+|------------------------|------------------------|------------------------|
 | sentimiento | categórica (positivo/negativo/neutral) | análisis de sentimiento |
 | emoción | categórica (aceptación, escepticismo, temor, etc.) | análisis NLP |
 | tema_principal | categórica (uso práctico, crítica técnica, crítica ética, impacto laboral) | clasificación por palabras clave o clustering |
