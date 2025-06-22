@@ -64,13 +64,13 @@ Los datos provienen de comentarios extraídos del subreddit [`r/devsarg`](https:
 
 ### Antecedentes
 
-Este análisis se inspira en estudios como la Stack Overflow Developer Survey 2023 (si bien ese instrumento recolecta información de primera mano, a diferencia de esta), que recoge información de primera mano mediante encuestas directas a desarrolladores a nivel global. En contraste, este trabajo se basa en una fuente secundaria, y se analizan datos extraídos de interacciones en línea en un entorno virtual más localizado, predominante en usuarios de Argentina y el Cono Sur.
+Este análisis se inspira en estudios como la Stack Overflow Developer Survey 2023 (si bien ese instrumento recolecta información de primera mano, a diferencia de esta), que recoge información de primera mano mediante encuestas directas a desarrolladores a nivel global. En contraste, este trabajo se basa en una fuente secundaria, y se analizan datos extraídos de interacciones en línea en un entorno virtual más localizado, predominantemente habitado por usuarios de Argentina y el Cono Sur.
 
 Fuente: [Stack Overflow Developer Survey 2023 – Sentiment and usage: AI](https://survey.stackoverflow.co/2023/#sentiment-and-usage-ai-select)
 
 ## Análisis
 
-Tras completar las fases iniciales de extracción de datos desde Reddit, a las que se puede acceder en [Extracción de datos con PRAW](https://github.com/LorenzoFerreyra/reddit-data-extraction/blob/main/Extraccion%20de%20datos%20de%20Reddit%20con%20praw%20para%20text%20mining.ipynb) y la posterior manipulación y transformación de los datos en [Manipulación de datos](https://github.com/LorenzoFerreyra/reddit-data-extraction/blob/main/Manipulaci%C3%B3n%20de%20datos.ipynb), se da inicio a la fase de análisis, donde se aplican técnicas de minería de texto para explorar las opiniones de la comunidad IT sobre la inteligencia artificial generativa.
+Tras completar las fases iniciales de extracción de datos desde Reddit, a las que se puede acceder en [Extracción de datos con PRAW](https://github.com/LorenzoFerreyra/reddit-data-extraction/blob/main/Extraccion%20de%20datos%20de%20Reddit%20con%20praw%20para%20text%20mining.ipynb) y la posterior manipulación y transformación de los datos en [Manipulación de datos](https://github.com/LorenzoFerreyra/reddit-data-extraction/blob/main/Manipulaci%C3%B3n%20de%20datos.ipynb), se da inicio a la fase de análisis, donde se aplican técnicas de minería de texto para explorar las opiniones de la comunidad IT sobre la inteligencia artificial generativa. Para comprender en mayor profundidad los criterios y decisiones tomadas durante la etapa de extracción, puede consultarse también el [documento metodológico](https://github.com/LorenzoFerreyra/reddit-data-extraction/blob/main/Documento%20metodol%C3%B3gico.md).
 
 ## Librerías
 
@@ -456,7 +456,7 @@ Sin embargo, también emergieron con fuerza menciones críticas asociadas al esc
 
 ## Referencias
 
--   Arii, B. *Text Mining Resources*. Disponible en: <https://ariibard.github.io/>
+-   Ariana Bardauil. *Text Mining Resources*. Disponible en: <https://ariibard.github.io/>
 
 -   Number Analytics. *Advanced Text Mining with tidytext in R*. Disponible en: <https://www.numberanalytics.com/blog/advanced-text-mining-tidytext-r>
 
