@@ -5,6 +5,10 @@ format:
   html:
     self-contained: true
 editor: visual
+toc: true
+toc-location: body
+toc-title: "Contenido"
+number-sections: true
 ---
 
 ## Librerías
@@ -13,20 +17,22 @@ Importamos las librerías necesarias.
 
 ```{r}
 #| echo: false
-library(readxl)
-library(dplyr)
-library(stringr)
-library(ggplot2)
-library(knitr)
-library(tidytext)
-library(stopwords)
-library(wordcloud2)
-library(syuzhet)
-library(tidyr)
-library(udpipe)
-library(tm)
-library(reshape2)
-library(topicmodels) 
+suppressWarnings(suppressPackageStartupMessages({
+  library(readxl)
+  library(dplyr)
+  library(stringr)
+  library(ggplot2)
+  library(knitr)
+  library(tidytext)
+  library(stopwords)
+  library(wordcloud2)
+  library(syuzhet)
+  library(tidyr)
+  library(udpipe)
+  library(tm)
+  library(reshape2)
+  library(topicmodels)
+}))
 ```
 
 ## Carga de datos
@@ -66,7 +72,7 @@ comments_clean <- comments %>%
   mutate(body = str_squish(body))
 ```
 
-Como los títulos y el cuerpo de las publicaciones también tienen información muy relevantes, se hará una combinación de ambos dataframes, con el mismo procesamiento.
+Como los títulos y el cuerpo de las publicaciones también tienen información muy relevante, se hará una combinación de ambos dataframes, con el mismo procesamiento.
 
 ```{r}
 posts_clean <- posts %>%
@@ -96,7 +102,7 @@ head(comments_clean, 5) %>%
 Se lematizan, tokenizan y combinan ambos dataframes con rbind.
 
 ```{r}
-modelo_ud <- udpipe_download_model(language = "spanish", model_dir = "models")
+#modelo_ud <- udpipe_download_model(language = "spanish", model_dir = "models")
 modelo <- udpipe_load_model("models/spanish-gsd-ud-2.5-191206.udpipe")
 anotados_comentarios <- udpipe_annotate(modelo, x = comments_clean$body)
 anotados_comentarios <- as.data.frame(anotados_comentarios)
@@ -126,11 +132,11 @@ stopwords_es <- tibble(palabra = stopwords("es"))
 
 ### Personalización de las stopwords
 
-Dado que las stopwords que nos ofrece la librería stopwords para la lengua española no es exhaustiva, se la personaliza para agregar unidades relevantes para este caso. Si bien las stopwords suelen ser mayormente las precisiones, se agregan verbos en infinitivo porque no aportan al análisis.
+Dado que las stopwords que nos ofrece la librería stopwords para la lengua española no es exhaustiva, se la personaliza para agregar unidades relevantes para este caso. Si bien las stopwords suelen ser mayormente las preposiciones, se agregan verbos en infinitivo porque no aportan al análisis.
 
 ```{r}
 mis_stopwords <- tibble(lemma = c("si", "mas", "ahora", "menos", "solo", "vos",
-"mismo", "mejor", "sino", "q","así", "ser", "hacer",  "tener", "haber", "poder", "ir", "decir", "usar", "saber", "dar", "pasar", "querer", "ver", "creer"))
+"mismo", "mejor", "sino", "q","así", "ser", "hacer",  "tener", "haber", "poder", "ir", "decir", "usar", "saber", "dar", "pasar", "querer", "ver", "creer","removed"))
 stopwords_es <- tibble(lemma = stopwords("es")) %>%
   bind_rows(mis_stopwords)
 tokens_combinados <- tokens_combinados %>%
@@ -157,7 +163,22 @@ wordcloud2(data = frecuencias, size = 1.5, color = 'random-light', backgroundCol
 
 ```
 
-Palabras como ia, código, gente, programadores y laburo, además de años, demuestran que en el conjunto de datos se encuentran discusiones relevantes no solo sobre la inteligencia artificial generativa como tal, sino sobre el futuro del trabajo y la productividad.
+Palabras como ia, código, gente, programadores y trabajo, además de años, demuestran que en el conjunto de datos se encuentran discusiones relevantes no solo sobre la inteligencia artificial generativa como tal, sino sobre el futuro del trabajo y la productividad.
+
+### Modelado de tópicos con LDA
+
+```{r}  dtm <- tokens_combinados %>%   count(doc_id, lemma) %>%   cast_dtm(document = doc_id, term = lemma, value = n)  lda_model <- LDA(dtm, k = 3, control = list(seed = 1234))}
+```
+
+A continuación, se extraen las palabras más representativas por tema y se calcula la probabilidad de cada palabra en cada tópico. Luego, se agrupa por tópico y se eligen las 10 palabras más representativas (con mayor beta), ya que las palabras con mayor beta para cada tópico son las que mejor definen ese tema.
+
+```{r} topics <- tidy(lda_model, matrix = "beta") %>%   group_by(topic) %>%   top_n(10, beta) %>%   arrange(topic, -beta)}
+```
+
+Aquí se agrupan las palabras por tópico (una faceta por cada tema) y se muestra qué tan importante (qué tan alta es beta) es cada término para ese tópico.
+
+```{r} ggplot(topics, aes(x = reorder_within(term, beta, topic), y = beta, fill = factor(topic))) +   geom_col(show.legend = FALSE) +   facet_wrap(~ topic, scales = "free") +   coord_flip() +   scale_x_reordered() +   labs(title = "Tópicos identificados por LDA", x = "Términos", y = "Importancia")}
+```
 
 ## Análisis de sentimientos
 
@@ -191,7 +212,7 @@ ggplot(sentimientos_totales, aes(x = reorder(sentimiento, frecuencia), y = frecu
 
 A partir del análisis de los comentarios y publicaciones combinados, se observa una predominancia de sentimientos positivos, seguidos por negativos, y en menor medida, emociones como *trust*, *anticipation*, *sadness* y *fear*. Esta distribución posibilta la hipótesis de una actitud pragmática y funcional por parte de los profesionales IT frente a la inteligencia artificial generativa, con una valoración positiva de su potencial productivo, aunque sin dejar de lado preocupaciones técnicas o éticas.
 
-Asimismo, el hecho de que las emociones negativas no sean dominantes, pero sí estén presentes en forma significativa (*fear*, *sadness*, *anger*), permite identificar tensiones latentes respecto al impacto de estas tecnologías, especialmente cuando se piensa en la calidad de los resultados y el futuro del trabajo.
+Asimismo, el hecho de que las emociones negativas no sean dominantes, pero sí estén presentes de forma significativa (*fear*, *sadness*, *anger*), permite identificar tensiones latentes respecto al impacto de estas tecnologías, especialmente cuando se piensa en la calidad de los resultados y el futuro del trabajo.
 
 ```{r}
 polaridad <- sentimientos_totales %>%
@@ -207,7 +228,7 @@ ggplot(polaridad, aes(x = sentimiento, y = frecuencia, fill = sentimiento)) +
 
 ### ¿Qué temas o preocupaciones se mencionan con mayor frecuencia?
 
-Para contestar esta pregunta, se identifican los temas más mencionados en los textos. Para ello, se crean variables que detectan si en cada comentario o publicación aparecen palabras clave asociadas a productividad, empleo, errores técnicos o cuestiones éticas. Se cuenta cuántas veces se menciona cada tema y se visualiza en un gráfico. Esto permite observar qué preocupaciones son más frecuentes en el discurso sobre IA generativa entre profesionales IT.
+Para contestar esta pregunta, se identifican los temas más mencionados en los textos. Para ello, se crean columnas binarias que detectan si en cada comentario o publicación aparecen palabras clave asociadas a productividad, empleo, errores técnicos o cuestiones éticas. Se cuenta cuántas veces se menciona cada tema y se visualiza en un gráfico. Esto permite observar qué preocupaciones son más frecuentes en el discurso sobre IA generativa entre profesionales IT.
 
 ```{r}
 tokens_combinados <- tokens_combinados %>%
@@ -245,14 +266,23 @@ ggplot(menciones_totales, aes(x = reorder(categoria, frecuencia), y = frecuencia
 
 ```
 
+Puede observarse un enfoque pragmático en los usuarios del subreddit acerca del impacto directo de la tecnología. Los temas de 'empleo' (más de 150 menciones) y 'productividad' (más de 100 menciones) son los más frecuentes, lo que demuestra la importancia de estos tópicos. Las menciones de 'errores' también son significativas, mientras que la 'ética' es el tema menos discutido.
+
+Así, , los profesionales IT que participan en estas discusiones sobre IA generativa parecen tener una mentalidad muy pragmática, orientada a la utilidad y profundamente consciente de las implicaciones laborales y los desafíos técnicos de esta tecnología. Las consideraciones éticas están presentes, pero ocupan un segundo plano no significativo en comparación con estas preocupaciones más directas y personales.
+
 ### ¿Qué actitudes predominan: entusiasmo, escepticismo, temor, indiferencia?
+
+Para contestar esta pregunta, se agrupan las emociones en tres grandes actitudes frente a la inteligencia artificial generativa: entusiasmo, temor y escepticismo. La categoría de entusiasmo incluye emociones como alegría, confianza y anticipación, además de la polaridad positiva, y refleja una actitud optimista respecto al potencial productivo de estas tecnologías. Por otro lado, las emociones vinculadas al temor, como miedo y tristeza, expresan inquietudes relacionadas con el impacto de la IA en el trabajo, la precisión de sus respuestas o la incertidumbre general frente a su avance.
+
+El escepticismo, por otro lado, se asocia con emociones como enojo, disgusto y la polaridad negativa, y suele expresar una postura crítica o de rechazo, especialmente frente a limitaciones técnicas o posibles consecuencias sociales.
 
 ```{r}
 actitudes <- sentimientos_totales %>%
 mutate(
 actitud = case_when(
 sentimiento %in% c("joy", "trust", "positive", "anticipation") ~ "entusiasmo",
-sentimiento %in% c("fear", "anger", "sadness", "disgust", "negative") ~ "temor / escepticismo",
+sentimiento %in% c("fear", "sadness") ~ "temor",
+      sentimiento %in% c("anger", "disgust", "negative") ~ "escepticismo",
 TRUE ~ "otro"
 )
 ) %>%
@@ -264,32 +294,4 @@ geom_col(show.legend = FALSE) +
 labs(title = "Actitudes predominantes en los comentarios", x = "", y = "Frecuencia")
 ```
 
-```{r}
-
-dtm <- tokens_combinados %>%
-  count(doc_id, lemma) %>%
-  cast_dtm(document = doc_id, term = lemma, value = n)
-
-lda_model <- LDA(dtm, k = 4, control = list(seed = 1234))
-
-```
-
-A continuación, se extraen las palabras más representativas por tema y se calcula la probabilidad de cada palabra en cada tópico. Luego, se agrupa por tópico y se eligen las 10 palabras más representativas (con mayor beta), ya que las palabras con mayor beta para cada tópico son las que mejor definen ese tema.
-
-```{r}
-topics <- tidy(lda_model, matrix = "beta") %>%
-  group_by(topic) %>%
-  top_n(10, beta) %>%
-  arrange(topic, -beta)
-```
-
-Aquí se agrupan las palabras por tópico (una faceta por cada tema) y se muestra qué tan importante (alta beta) es cada término para ese tópico.
-
-```{r}
-ggplot(topics, aes(x = reorder_within(term, beta, topic), y = beta, fill = factor(topic))) +
-  geom_col(show.legend = FALSE) +
-  facet_wrap(~ topic, scales = "free") +
-  coord_flip() +
-  scale_x_reordered() +
-  labs(title = "Tópicos identificados por LDA", x = "Términos", y = "Importancia")
-```
+La distribución observada muestra un predominio de actitudes entusiastas, seguidas por una presencia significativa tanto de escepticismo seguidamente de temor, por lo que puede considerarse una comunidad que valora el potencial de la IA pero que no deja de señalar sus riesgos y desafíos.
