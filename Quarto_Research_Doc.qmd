@@ -48,7 +48,7 @@ Analizar las opiniones y preocupaciones expresadas por desarrolladores y persona
 |------------------------|------------------------|------------------------|
 | sentimiento | categórica (positivo/negativo/neutral) | análisis de sentimiento |
 | emoción | categórica (aceptación, escepticismo, temor, etc.) | análisis NLP |
-| tema_principal | categórica (uso práctico, crítica técnica, crítica ética, impacto laboral) | clasificación por palabras clave o clustering |
+| tema_principal | categórica (uso práctico, crítica técnica, crítica ética, impacto laboral) | modelado de tópicos |
 | menciona_productividad | binaria | regex/keywords: automatizar, ayuda, mejora |
 | menciona_empleo | binaria | desempleo, reemplazo, trabajo, fin del desarrollador |
 | menciona_errores | binaria | alucina, error, se equivoca, confunde |
