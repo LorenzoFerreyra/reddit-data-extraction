@@ -86,7 +86,7 @@ posts_clean <- posts %>%
 El resultado del preprocesamiento son los siguientes dataframes. Publicaciones:
 
 ```{r}
-head(posts_clean, 5) %>% 
+head(posts_clean, 3) %>% 
   kable()
 ```
 
@@ -167,18 +167,30 @@ Palabras como ia, código, gente, programadores y trabajo, además de años, dem
 
 ### Modelado de tópicos con LDA
 
-```{r}  dtm <- tokens_combinados %>%   count(doc_id, lemma) %>%   cast_dtm(document = doc_id, term = lemma, value = n)  lda_model <- LDA(dtm, k = 3, control = list(seed = 1234))}
+```{r}
+dtm <- tokens_combinados %>%  
+  count(doc_id, lemma) %>%  
+  cast_dtm(document = doc_id, term = lemma, value = n)
+lda_model <- LDA(dtm, k = 3, control = list(seed = 1234))
 ```
 
 A continuación, se extraen las palabras más representativas por tema y se calcula la probabilidad de cada palabra en cada tópico. Luego, se agrupa por tópico y se eligen las 10 palabras más representativas (con mayor beta), ya que las palabras con mayor beta para cada tópico son las que mejor definen ese tema.
 
-```{r} topics <- tidy(lda_model, matrix = "beta") %>%   group_by(topic) %>%   top_n(10, beta) %>%   arrange(topic, -beta)}
+```{r}
+topics <- tidy(lda_model, matrix = "beta") %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  arrange(topic, -beta)
 ```
 
 Aquí se agrupan las palabras por tópico (una faceta por cada tema) y se muestra qué tan importante (qué tan alta es beta) es cada término para ese tópico.
 
-```{r} ggplot(topics, aes(x = reorder_within(term, beta, topic), y = beta, fill = factor(topic))) +   geom_col(show.legend = FALSE) +   facet_wrap(~ topic, scales = "free") +   coord_flip() +   scale_x_reordered() +   labs(title = "Tópicos identificados por LDA", x = "Términos", y = "Importancia")}
+```{r}
+ggplot(topics, aes(x = reorder_within(term, beta, topic),
+                   y = beta, fill = factor(topic))) +   geom_col(show.legend = FALSE) +   facet_wrap(~ topic, scales = "free") +   coord_flip() +   scale_x_reordered() +   labs(title = "Tópicos identificados por LDA", x = "Términos", y = "Importancia")
 ```
+
+Con estos tres grandes tópicos obtenidos mediante LDA, se observa una orientación pragmática en las conversaciones de la comunidad IT sobre la inteligencia artificial generativa. Entre los resultados se destacan el interés por su aplicación concreta en el desarrollo y la programación (tópico 2), así como su impacto en el ámbito laboral y profesional (tópico 1). El tópico 3, más vinculado a aspectos sociales, muestra que también se tienen discusiones sobre dinámicas colectivas y cuestiones socioeconómicas, como el papel de los sindicatos. Esto complementa las preocupaciones sobre el trabajo ya observadas y refuerza las hipótesis de un enfoque funcional y de alerta ante las transformaciones laborales. La falta de un tópico enfocado exclusivamente en aspectos éticos sugiere que, en comparación con los temas técnicos y ocupacionales, las inquietudes éticas ocupan un lugar más bien subalterno.
 
 ## Análisis de sentimientos
 
