@@ -1,0 +1,464 @@
+---
+title: "Trabajo de Taller de investigación: text mining"
+author: "Lorenzo Ferreyra (Universidad de Flores)"
+format: 
+  html:
+    self-contained: true
+editor: visual
+toc: true
+toc-location: body
+toc-title: "Contenido"
+number-sections: true
+---
+
+
+
+## Introducción
+
+## Opiniones de la comunidad IT sobre la inteligencia artificial generativa: análisis de comentarios en Reddit
+
+### Objetivo general
+
+Analizar las opiniones y preocupaciones expresadas por desarrolladores y personal IT respecto a la inteligencia artificial generativa y los grandes modelos de lenguaje (LLM), a través de sus comentarios en Reddit.
+
+### Objetivos específicos
+
+-   Identificar temas recurrentes en las discusiones sobre IA generativa dentro de comunidades técnicas.
+-   Explorar las emociones y actitudes predominantes respecto a herramientas como ChatGPT, GitHub Copilot, Cursor, etc.
+-   Detectar patrones de aceptación, resistencia o preocupación vinculados al impacto laboral, ético o productivo de estas tecnologías.
+
+### Pregunta de investigación
+
+¿Qué piensan los desarrolladores y profesionales IT sobre la inteligencia artificial generativa y sus aplicaciones?
+
+#### Subpreguntas
+
+-   ¿Qué temas o preocupaciones se mencionan con mayor frecuencia?
+-   ¿Qué actitudes predominan: entusiasmo, escepticismo, temor, indiferencia?
+
+### Hipótesis
+
+1.  Predominio de enfoque funcional y pragmático: la mayoría de los comentarios sobre IA generativa expresan una actitud pragmática y centrada en su utilidad práctica y productividad.
+2.  Críticas centradas en problemas técnicos: las críticas a la IA generativa en comentarios negativos se centran más en sus limitaciones técnicas que en preocupaciones éticas o laborales.
+3.  Presencia significativa de preocupaciones sobre el impacto laboral: existe un segmento relevante de la comunidad IT que expresa preocupación por el posible impacto negativo de la IA generativa en el futuro del trabajo y la estabilidad laboral.
+
+### Variables principales
+
+| Variable | Tipo | Cómo se obtiene |
+|------------------|--------------------|----------------------------------|
+| sentimiento | categórica (positivo/negativo/neutral) | análisis de sentimiento |
+| emoción | categórica (aceptación, escepticismo, temor, etc.) | análisis NLP |
+| tema_principal | categórica (uso práctico, crítica técnica, crítica ética, impacto laboral) | clasificación por palabras clave o clustering |
+| menciona_productividad | binaria | regex/keywords: automatizar, ayuda, mejora |
+| menciona_empleo | binaria | desempleo, reemplazo, trabajo, fin del desarrollador |
+| menciona_errores | binaria | alucina, error, se equivoca, confunde |
+| menciona_ética | binaria | sesgo, ética, desinformación |
+
+### Metodología
+
+Se adopta un enfoque exploratorio y descriptivo, basado en minería de texto y procesamiento de lenguaje natural (NLP). La extracción de datos se realiza con Python (utilizando la librería `praw` para acceder a la API de Reddit), mientras que el análisis y visualización se llevan a cabo en R, con redacción final en Quarto.
+
+### Descripción del corpus
+
+Los datos provienen de comentarios extraídos del subreddit [`r/devsarg`](https://www.reddit.com/r/devsarg/), un espacio activo de discusión entre profesionales IT en Reddit, que refleja percepciones actuales sobre inteligencia artificial generativa y tecnologías asociadas.
+
+### Antecedentes
+
+Este análisis se inspira en estudios como la Stack Overflow Developer Survey 2023 (si bien ese instrumento recolecta información de primera mano, a diferencia de esta), que recoge información de primera mano mediante encuestas directas a desarrolladores a nivel global. En contraste, este trabajo se basa en una fuente secundaria, y se analizan datos extraídos de interacciones en línea en un entorno virtual más localizado, predominante en usuarios de Argentina y el Cono Sur.
+
+Fuente: [Stack Overflow Developer Survey 2023 – Sentiment and usage: AI](https://survey.stackoverflow.co/2023/#sentiment-and-usage-ai-select)
+
+## Análisis
+
+Tras completar las fases iniciales de extracción de datos desde Reddit, a las que se puede acceder en [Extracción de datos con PRAW](https://github.com/LorenzoFerreyra/reddit-data-extraction/blob/main/Extraccion%20de%20datos%20de%20Reddit%20con%20praw%20para%20text%20mining.ipynb) y la posterior manipulación y transformación de los datos en [Manipulación de datos](https://github.com/LorenzoFerreyra/reddit-data-extraction/blob/main/Manipulaci%C3%B3n%20de%20datos.ipynb), se da inicio a la fase de análisis, donde se aplican técnicas de minería de texto para explorar las opiniones de la comunidad IT sobre la inteligencia artificial generativa.
+
+## Librerías
+
+Importamos las librerías. Este análisis se apoyó en varias librerías del universo R para procesamiento, análisis y visualización de texto. Se utilizaron: readxl, dplyr, stringr, ggplot2, knitr, tidytext, stopwords, wordcloud2, syuzhet, tidyr, udpipe, tm, reshape2 y topicmodels.
+
+
+
+```{r}
+suppressWarnings(suppressPackageStartupMessages({
+  library(readxl)
+  library(dplyr)
+  library(stringr)
+  library(ggplot2)
+  library(knitr)
+  library(tidytext)
+  library(stopwords)
+  library(wordcloud2)
+  library(syuzhet)
+  library(tidyr)
+  library(udpipe)
+  library(tm)
+  library(reshape2)
+  library(topicmodels)
+}))
+```
+
+
+
+## Carga de datos
+
+Se leen los archivos de Excel. En el paso anterior de transformación, se dividió el archivo .json extraído de Reddit en dos entidades: comentarios y publicaciones, para mantener una estructura relacional y que los comentarios no pierdan los metadatos de las publicaciones asociadas.
+
+
+
+```{r}
+comments <- read_excel("output_files/comments.xlsx")
+posts <- read_excel("output_files/posts.xlsx")
+```
+
+
+
+Se obtiene un vistazo preliminar de los primeros registros de los conjuntos de datos para verificar que la lectura del archivo fue exitosa y entender la estructura de las variables antes de iniciar el análisis como tal.
+
+### Estructura de comentarios
+
+
+
+```{r}
+head(comments, 5) %>% 
+  kable()
+```
+
+
+
+### Estructura de publicaciones
+
+
+
+```{r}
+head(posts, 3) %>% 
+  kable()
+```
+
+
+
+## Preprocesamiento de datos
+
+Se limpia el texto de los comentarios; se pasa todo a minúsculas, se eliminan links, símbolos irrelevantes, etc.
+
+
+
+```{r}
+comments_clean <- comments %>%
+  mutate(body = str_to_lower(body)) %>%
+  mutate(body = str_remove_all(body, "http\\S+|www\\S+")) %>%
+  mutate(body = str_remove_all(body, "[^a-záéíóúüñ\\s]")) %>%
+  mutate(body = str_squish(body))
+```
+
+
+
+Como los títulos y el cuerpo de las publicaciones también tienen información muy relevante, se hará una combinación de ambos dataframes, con el mismo procesamiento.
+
+
+
+```{r}
+posts_clean <- posts %>%
+  mutate(body = str_to_lower(body)) %>%
+  mutate(body = str_remove_all(body, "http\\S+|www\\S+")) %>%
+  mutate(body = str_remove_all(body, "[^a-záéíóúüñ\\s]")) %>%
+  mutate(body = str_squish(body))
+
+```
+
+
+
+El resultado del preprocesamiento son los siguientes dataframes. Publicaciones:
+
+
+
+```{r}
+head(posts_clean, 3) %>% 
+  kable()
+```
+
+
+
+Comentarios:
+
+
+
+```{r}
+head(comments_clean, 5) %>% 
+  kable()
+```
+
+
+
+### Lematización y tokenización
+
+Se lematizan, tokenizan y combinan ambos dataframes con rbind.
+
+
+
+```{r}
+#modelo_ud <- udpipe_download_model(language = "spanish", model_dir = "models")
+modelo <- udpipe_load_model("models/spanish-gsd-ud-2.5-191206.udpipe")
+anotados_comentarios <- udpipe_annotate(modelo, x = comments_clean$body)
+anotados_comentarios <- as.data.frame(anotados_comentarios)
+anotados_comentarios$origen <- "comentario"
+anotados_posts <- udpipe_annotate(modelo, x = posts_clean$body)
+anotados_posts <- as.data.frame(anotados_posts)
+anotados_posts$origen <- "post"
+tokens_combinados <- bind_rows(anotados_comentarios, anotados_posts)
+
+
+```
+
+
+
+Observación del dataframe luego del procesamiento de datos y la lematización (que incluye el tokenizado).
+
+
+
+```{r}
+
+head(tokens_combinados %>% select(token, lemma, upos, origen), 10) %>% 
+  kable()
+```
+
+
+
+### Eliminación de stopwords
+
+
+
+```{r}
+
+stopwords_es <- tibble(palabra = stopwords("es"))
+```
+
+
+
+### Personalización de las stopwords
+
+Dado que las stopwords que nos ofrece la librería stopwords para la lengua española no es exhaustiva, se la personaliza para agregar unidades relevantes para este caso. Si bien las stopwords suelen ser mayormente las preposiciones, se agregan verbos en infinitivo porque no aportan al análisis.
+
+
+
+```{r}
+mis_stopwords <- tibble(lemma = c("si", "mas", "ahora", "menos", "solo", "vos",
+"mismo", "mejor", "sino", "q","así", "ser", "hacer",  "tener", "haber", "poder", "ir", "decir", "usar", "saber", "dar", "pasar", "querer", "ver", "creer","removed"))
+stopwords_es <- tibble(lemma = stopwords("es")) %>%
+  bind_rows(mis_stopwords)
+tokens_combinados <- tokens_combinados %>%
+  filter(!is.na(lemma)) %>%
+  anti_join(stopwords_es, by = "lemma")
+```
+
+
+
+## Análisis de frecuencia de palabras
+
+
+
+```{r}
+frecuencias <- tokens_combinados %>%
+  count(lemma, sort = TRUE)
+
+head(frecuencias, 20) %>%
+  ggplot(aes(x = reorder(lemma, n), y = n)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(title = "Palabras más frecuentes en los comentarios", x = "", y = "Frecuencia")
+
+```
+
+```{r}
+wordcloud2(data = frecuencias, size = 1.5, color = 'random-light', backgroundColor = "black")
+
+```
+
+
+
+Palabras como ia, código, gente, programadores y trabajo, además de años, demuestran que en el conjunto de datos se encuentran discusiones relevantes no solo sobre la inteligencia artificial generativa como tal, sino sobre el futuro del trabajo y la productividad.
+
+## Modelado de tópicos con LDA
+
+
+
+```{r}
+dtm <- tokens_combinados %>%  
+  count(doc_id, lemma) %>%  
+  cast_dtm(document = doc_id, term = lemma, value = n)
+lda_model <- LDA(dtm, k = 3, control = list(seed = 1234))
+```
+
+
+
+A continuación, se extraen las palabras más representativas por tema y se calcula la probabilidad de cada palabra en cada tópico. Luego, se agrupa por tópico y se eligen las 10 palabras más representativas (con mayor beta), ya que las palabras con mayor beta para cada tópico son las que mejor definen ese tema.
+
+
+
+```{r}
+topics <- tidy(lda_model, matrix = "beta") %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  arrange(topic, -beta)
+```
+
+
+
+Aquí se agrupan las palabras por tópico (una faceta por cada tema) y se muestra qué tan importante (qué tan alta es beta) es cada término para ese tópico.
+
+
+
+```{r}
+ggplot(topics, aes(x = reorder_within(term, beta, topic),
+                   y = beta, fill = factor(topic))) +   geom_col(show.legend = FALSE) +   facet_wrap(~ topic, scales = "free") +   coord_flip() +   scale_x_reordered() +   labs(title = "Tópicos identificados por LDA", x = "Términos", y = "Importancia")
+```
+
+
+
+Con estos tres grandes tópicos obtenidos mediante LDA, se observa una orientación pragmática en las conversaciones de la comunidad IT sobre la inteligencia artificial generativa. Entre los resultados se destacan el interés por su aplicación concreta en el desarrollo y la programación (tópico 2), así como su impacto en el ámbito laboral y profesional (tópico 1). El tópico 3, más vinculado a aspectos sociales, muestra que también se tienen discusiones sobre dinámicas colectivas y cuestiones socioeconómicas, como el papel de los sindicatos. Esto complementa las preocupaciones sobre el trabajo ya observadas y refuerza las hipótesis de un enfoque funcional y de alerta ante las transformaciones laborales. La falta de un tópico enfocado exclusivamente en aspectos éticos sugiere que, en comparación con los temas técnicos y ocupacionales, las inquietudes éticas ocupan un lugar más bien subalterno.
+
+## Análisis de sentimientos
+
+Se utiliza el léxico NRC adaptado al español, el cual clasifica las palabras en categorías de emociones básicas (como *joy*, *fear*, *anger*, *trust*, etc.) y también según polaridad (*positive* o *negative*).
+
+
+
+```{r}
+sentimientos <- get_nrc_sentiment(tokens_combinados$lemma, language = "spanish")
+
+```
+
+```{r}
+sentimientos$palabra <- tokens_combinados$lemma
+
+```
+
+```{r}
+sentimientos_totales <- sentimientos %>%
+  select(-palabra) %>%  
+  summarise(across(everything(), sum)) %>%  
+  pivot_longer(cols = everything(), names_to = "sentimiento", values_to = "frecuencia") %>%
+  arrange(desc(frecuencia))
+ggplot(sentimientos_totales, aes(x = reorder(sentimiento, frecuencia), y = frecuencia, fill = sentimiento)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  labs(
+    title = "Distribución de sentimientos en los comentarios",
+    x = "Sentimiento",
+    y = "Frecuencia"
+  )
+```
+
+
+
+A partir del análisis de los comentarios y publicaciones combinados, se observa una predominancia de sentimientos positivos, seguidos por negativos, y en menor medida, emociones como *trust*, *anticipation*, *sadness* y *fear*. Esta distribución posibilta la hipótesis de una actitud pragmática y funcional por parte de los profesionales IT frente a la inteligencia artificial generativa, con una valoración positiva de su potencial productivo, aunque sin dejar de lado preocupaciones técnicas o éticas.
+
+Asimismo, el hecho de que las emociones negativas no sean dominantes, pero sí estén presentes de forma significativa (*fear*, *sadness*, *anger*), permite identificar tensiones latentes respecto al impacto de estas tecnologías, especialmente cuando se piensa en la calidad de los resultados y el futuro del trabajo.
+
+
+
+```{r}
+polaridad <- sentimientos_totales %>%
+  filter(sentimiento %in% c("positive", "negative"))
+
+ggplot(polaridad, aes(x = sentimiento, y = frecuencia, fill = sentimiento)) +
+  geom_col(show.legend = FALSE) +
+  labs(title = "Polaridad de los sentimientos", x = "Polaridad", y = "Frecuencia")
+
+```
+
+
+
+## Interpretación de resultados y discusión
+
+### ¿Qué temas o preocupaciones se mencionan con mayor frecuencia?
+
+Para contestar esta pregunta, se identifican los temas más mencionados en los textos. Para ello, se crean columnas binarias que detectan si en cada comentario o publicación aparecen palabras clave asociadas a productividad, empleo, errores técnicos o cuestiones éticas. Se cuenta cuántas veces se menciona cada tema y se visualiza en un gráfico. Esto permite observar qué preocupaciones son más frecuentes en el discurso sobre IA generativa entre profesionales IT.
+
+
+
+```{r}
+tokens_combinados <- tokens_combinados %>%
+  mutate(
+    menciona_productividad = if_else(str_detect(lemma, 
+      "automatizar|automatización|ayuda|mejora|productividad|eficiencia|rápido|velocidad|optimizar|optimización|rendimiento|agilizar|facilitar|acelerar|aumentar"), 1, 0),
+    
+    menciona_empleo = if_else(str_detect(lemma, 
+      "desempleo|reemplazo|trabajo|empleo|ocupación|puesto|laboral|desarrollador|profesión|oficio|recursos|sustituir|desplazar|perder"), 1, 0),
+    
+    menciona_errores = if_else(str_detect(lemma, 
+      "alucinar|alucinación|error|equivocar|confundir|malo|incorrecto|fallo|problema|falla|defecto|limitación|inexacto|bug"), 1, 0),
+    
+    menciona_etica = if_else(str_detect(lemma, 
+      "sesgo|ética|desinformación|manipular|engaño|falsedad|engañoso|responsabilidad|transparencia|discriminación|prejuicio|moral|control|censura|justicia|privacidad"), 1, 0)
+  )
+menciones_totales <- tokens_combinados %>%
+  summarise(
+    productividad = sum(menciona_productividad),
+    empleo = sum(menciona_empleo),
+    errores = sum(menciona_errores),
+    etica = sum(menciona_etica)
+  ) %>%
+  pivot_longer(cols = everything(), names_to = "categoria", values_to = "frecuencia")
+
+ggplot(menciones_totales, aes(x = reorder(categoria, frecuencia), y = frecuencia, fill = categoria)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  labs(
+    title = "Frecuencia de menciones por tema clave",
+    x = "Categoría",
+    y = "Frecuencia"
+  ) +
+  scale_fill_brewer(palette = "Set2")
+
+```
+
+
+
+Puede observarse un enfoque pragmático en los usuarios del subreddit acerca del impacto directo de la tecnología. Los temas de 'empleo' (más de 150 menciones) y 'productividad' (más de 100 menciones) son los más frecuentes, lo que demuestra la importancia de estos tópicos. Las menciones de 'errores' también son significativas, mientras que la 'ética' es el tema menos discutido.
+
+Así, , los profesionales IT que participan en estas discusiones sobre IA generativa parecen tener una mentalidad muy pragmática, orientada a la utilidad y profundamente consciente de las implicaciones laborales y los desafíos técnicos de esta tecnología. Las consideraciones éticas están presentes, pero ocupan un segundo plano no significativo en comparación con estas preocupaciones más directas y personales.
+
+### ¿Qué actitudes predominan: entusiasmo, escepticismo, temor, indiferencia?
+
+Para contestar esta pregunta, se agrupan las emociones en tres grandes actitudes frente a la inteligencia artificial generativa: entusiasmo, temor y escepticismo. La categoría de entusiasmo incluye emociones como alegría, confianza y anticipación, además de la polaridad positiva, y refleja una actitud optimista respecto al potencial productivo de estas tecnologías. Por otro lado, las emociones vinculadas al temor, como miedo y tristeza, expresan inquietudes relacionadas con el impacto de la IA en el trabajo, la precisión de sus respuestas o la incertidumbre general frente a su avance.
+
+El escepticismo, por otro lado, se asocia con emociones como enojo, disgusto y la polaridad negativa, y suele expresar una postura crítica o de rechazo, especialmente frente a limitaciones técnicas o posibles consecuencias sociales.
+
+
+
+```{r}
+actitudes <- sentimientos_totales %>%
+mutate(
+actitud = case_when(
+sentimiento %in% c("joy", "trust", "positive", "anticipation") ~ "entusiasmo",
+sentimiento %in% c("fear", "sadness") ~ "temor",
+      sentimiento %in% c("anger", "disgust", "negative") ~ "escepticismo",
+TRUE ~ "otro"
+)
+) %>%
+group_by(actitud) %>%
+summarise(frecuencia = sum(frecuencia))
+
+ggplot(actitudes, aes(x = actitud, y = frecuencia, fill = actitud)) +
+geom_col(show.legend = FALSE) +
+labs(title = "Actitudes predominantes en los comentarios", x = "", y = "Frecuencia")
+```
+
+
+
+La distribución observada muestra un predominio de actitudes entusiastas, seguidas por una presencia significativa tanto de escepticismo seguidamente de temor, por lo que puede considerarse una comunidad que valora el potencial de la IA pero que no deja de señalar sus riesgos y desafíos.
+
+## Conclusiones
+
+Al analizar los comentarios y publicaciones del subreddit r/devsarg, se logró explorar las percepciones y actitudes de una comunidad técnica ante la inteligencia artificial generativa, con foco en herramientas como ChatGPT y GitHub Copilot, entre otras. A través de distintas técnicas de minería de texto, se evidenció una orientación marcadamente pragmática: los tópicos más relevantes giraron en torno a la productividad y el impacto laboral en el desarrollo de software, en línea con las hipótesis planteadas. Los sentimientos predominantes fueron positivos, acompañados de emociones como alegría, confianza y anticipación, lo cual sugiere una actitud mayoritariamente entusiasta hacia la adopción de estas tecnologías.
+
+Sin embargo, también emergieron con fuerza menciones críticas asociadas al escepticismo técnico y al temor por el futuro del empleo, mientras que las preocupaciones éticas ocuparon un lugar marginal en las conversaciones. Esta jerarquización temática refuerza la idea de que, en contextos técnicos como este, las evaluaciones sobre la inteligencia artificial generativa se centran principalmente en su utilidad práctica y en los riesgos concretos percibidos en términos de desempeño o estabilidad laboral, antes que en debates más abstractos sobre ética o regulación.
+
+## Referencias
+
+-   Arii, B. *Text Mining Resources*. Disponible en: <https://ariibard.github.io/>
+
+-   Number Analytics. *Advanced Text Mining with tidytext in R*. Disponible en: <https://www.numberanalytics.com/blog/advanced-text-mining-tidytext-r>
+
+-   GitHub. *PRAW – Python Reddit API Wrapper*. Disponible en: <https://github.com/praw-dev/praw>
+
