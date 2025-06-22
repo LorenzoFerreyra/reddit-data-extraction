@@ -205,7 +205,9 @@ ggplot(polaridad, aes(x = sentimiento, y = frecuencia, fill = sentimiento)) +
 
 ## Interpretación de resultados y discusión
 
-¿Qué temas o preocupaciones se mencionan con mayor frecuencia?
+### ¿Qué temas o preocupaciones se mencionan con mayor frecuencia?
+
+Para contestar esta pregunta, se identifican los temas más mencionados en los textos. Para ello, se crean variables que detectan si en cada comentario o publicación aparecen palabras clave asociadas a productividad, empleo, errores técnicos o cuestiones éticas. Se cuenta cuántas veces se menciona cada tema y se visualiza en un gráfico. Esto permite observar qué preocupaciones son más frecuentes en el discurso sobre IA generativa entre profesionales IT.
 
 ```{r}
 tokens_combinados <- tokens_combinados %>%
@@ -243,7 +245,7 @@ ggplot(menciones_totales, aes(x = reorder(categoria, frecuencia), y = frecuencia
 
 ```
 
-## ¿Qué actitudes predominan: entusiasmo, escepticismo, temor, indiferencia?
+### ¿Qué actitudes predominan: entusiasmo, escepticismo, temor, indiferencia?
 
 ```{r}
 actitudes <- sentimientos_totales %>%
@@ -272,7 +274,7 @@ lda_model <- LDA(dtm, k = 4, control = list(seed = 1234))
 
 ```
 
-Se extraen las palabras más representativas por tema. Se calcula la probabilidad de cada palabra en cada tópico. Luego, se agrupa por tópico y se eligen las 10 palabras más representativas (con mayor beta), ya que las palabras con mayor beta para cada tópico son las que mejor definen ese tema.
+A continuación, se extraen las palabras más representativas por tema y se calcula la probabilidad de cada palabra en cada tópico. Luego, se agrupa por tópico y se eligen las 10 palabras más representativas (con mayor beta), ya que las palabras con mayor beta para cada tópico son las que mejor definen ese tema.
 
 ```{r}
 topics <- tidy(lda_model, matrix = "beta") %>%
