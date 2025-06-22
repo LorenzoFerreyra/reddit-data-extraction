@@ -5,5 +5,4 @@ reddit_credentials.json
 .Ruserdata
 *.Rproj
 .DS_Store
-*.html
 _quarto/
