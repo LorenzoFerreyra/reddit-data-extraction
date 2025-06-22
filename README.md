@@ -17,7 +17,7 @@ Analizar las opiniones y preocupaciones expresadas por desarrolladores y persona
 
 ## Hipótesis
 - **H1:**  Predominio de enfoque funcional y pragmático:  la mayoría de los comentarios sobre IA generativa expresan una actitud pragmática y centrada en su utilidad práctica y productividad
-- **H2:** Críticas centradas en problemas técnicos: las críticas a la IA generativa en comentarios negativos se centran más en sus limitaciones técnicas que en preocupaciones éticas o laborale  
+- **H2:** Críticas centradas en problemas técnicos: las críticas a la IA generativa en comentarios negativos se centran más en sus limitaciones técnicas que en preocupaciones éticas o laborales
 - **H3:** Presencia significativa de preocupaciones sobre el impacto laboral: existe un segmento relevante de la comunidad IT que expresa preocupación por el posible impacto negativo de la IA generativa en el futuro del trabajo y la estabilidad laboral.
 
 | Variable                 | Tipo                                                                       | Cómo se obtiene                                        |
