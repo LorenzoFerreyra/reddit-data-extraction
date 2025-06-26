@@ -1,3 +1,6 @@
+[`Ver informe en Quarto ->`](https://lorenzoferreyra.github.io/reddit-data-extraction/Quarto_Research_Doc.html)
+
+
 # Opiniones de la comunidad IT sobre la inteligencia artificial generativa: un análisis de comentarios en Reddit
 
 ## Objetivo general
